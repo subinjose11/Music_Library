@@ -7,14 +7,14 @@ import '../models/track_model.dart';
 import '../models/lyrics_model.dart';
 
 abstract class MusicRemoteDataSource {
-  /// Search for tracks using iTunes Search API
+  /// Search for tracks using Deezer API
   Future<List<TrackModel>> searchTracks({
     required String query,
     int offset = 0,
     int limit = 50,
   });
 
-  /// Get track details from iTunes Lookup API
+  /// Get track details from Deezer API
   Future<TrackModel> getTrackDetails(int trackId);
 
   /// Get lyrics from LRCLIB API
@@ -38,12 +38,10 @@ class MusicRemoteDataSourceImpl implements MusicRemoteDataSource {
     int limit = 50,
   }) async {
     final uri = Uri.parse(
-      '${ApiConstants.itunesBaseUrl}${ApiConstants.itunesSearchEndpoint}'
-      '?term=${Uri.encodeComponent(query)}'
-      '&media=music'
-      '&entity=song'
+      '${ApiConstants.deezerBaseUrl}${ApiConstants.deezerSearchEndpoint}'
+      '?q=${Uri.encodeComponent(query)}'
       '&limit=$limit'
-      '&offset=$offset',
+      '&index=$offset',
     );
 
     try {
@@ -51,15 +49,13 @@ class MusicRemoteDataSourceImpl implements MusicRemoteDataSource {
 
       if (response.statusCode == 200) {
         final jsonData = json.decode(response.body) as Map<String, dynamic>;
-        final results = jsonData['results'] as List<dynamic>?;
+        final results = jsonData['data'] as List<dynamic>?;
 
         if (results == null || results.isEmpty) {
           return [];
         }
 
-        // Filter only songs (exclude other types like music-video)
         return results
-            .where((item) => item['wrapperType'] == 'track' && item['kind'] == 'song')
             .map((trackJson) =>
                 TrackModel.fromJson(trackJson as Map<String, dynamic>))
             .toList();
@@ -78,8 +74,7 @@ class MusicRemoteDataSourceImpl implements MusicRemoteDataSource {
   @override
   Future<TrackModel> getTrackDetails(int trackId) async {
     final uri = Uri.parse(
-      '${ApiConstants.itunesBaseUrl}${ApiConstants.itunesLookupEndpoint}'
-      '?id=$trackId',
+      '${ApiConstants.deezerBaseUrl}${ApiConstants.deezerTrackEndpoint}/$trackId',
     );
 
     try {
@@ -87,16 +82,15 @@ class MusicRemoteDataSourceImpl implements MusicRemoteDataSource {
 
       if (response.statusCode == 200) {
         final jsonData = json.decode(response.body) as Map<String, dynamic>;
-        final results = jsonData['results'] as List<dynamic>?;
 
-        if (results == null || results.isEmpty) {
+        if (jsonData.containsKey('error')) {
           throw ServerException(
             message: 'Track not found',
             statusCode: 404,
           );
         }
 
-        return TrackModel.fromJson(results.first as Map<String, dynamic>);
+        return TrackModel.fromJson(jsonData);
       } else {
         throw ServerException(
           message: 'Failed to get track details',

@@ -1,10 +1,10 @@
 class ApiConstants {
   ApiConstants._();
 
-  // iTunes Search API (no geo-restrictions)
-  static const String itunesBaseUrl = 'https://itunes.apple.com';
-  static const String itunesSearchEndpoint = '/search';
-  static const String itunesLookupEndpoint = '/lookup';
+  // Deezer API (no authentication required)
+  static const String deezerBaseUrl = 'https://api.deezer.com';
+  static const String deezerSearchEndpoint = '/search';
+  static const String deezerTrackEndpoint = '/track';
 
   // LRCLIB API for lyrics
   static const String lrclibBaseUrl = 'https://lrclib.net/api';

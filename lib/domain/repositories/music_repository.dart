@@ -2,7 +2,7 @@ import '../entities/track.dart';
 import '../entities/lyrics.dart';
 
 abstract class MusicRepository {
-  /// Search for tracks using the Deezer API
+  /// Search for tracks using the Deezer API (no authentication required)
   /// Returns a list of tracks matching the query
   Future<List<Track>> searchTracks({
     required String query,
