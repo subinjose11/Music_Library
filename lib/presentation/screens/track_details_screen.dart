@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../core/theme/app_theme.dart';
 import '../../di/injection_container.dart';
 import '../../domain/entities/track.dart';
+import '../blocs/player/player_bloc.dart';
+import '../blocs/player/player_event.dart';
 import '../blocs/track_details/track_details_bloc.dart';
 import '../blocs/track_details/track_details_event.dart';
 import '../blocs/track_details/track_details_state.dart';
@@ -28,6 +31,16 @@ class TrackDetailsScreen extends StatelessWidget {
           duration: track.duration,
         )),
       child: Scaffold(
+        backgroundColor: AppColors.background,
+        floatingActionButton: FloatingActionButton.extended(
+          onPressed: () {
+            context.read<PlayerBloc>().add(PlayTrack(track));
+          },
+          backgroundColor: AppColors.accent,
+          foregroundColor: AppColors.white,
+          icon: const Icon(Icons.play_arrow),
+          label: const Text('Play'),
+        ),
         body: CustomScrollView(
           slivers: [
             _buildSliverAppBar(context),
@@ -38,7 +51,9 @@ class TrackDetailsScreen extends StatelessWidget {
                     return const Padding(
                       padding: EdgeInsets.all(32.0),
                       child: Center(
-                        child: CircularProgressIndicator(),
+                        child: CircularProgressIndicator(
+                          color: AppColors.accent,
+                        ),
                       ),
                     );
                   }
@@ -61,7 +76,10 @@ class TrackDetailsScreen extends StatelessWidget {
                     return Padding(
                       padding: const EdgeInsets.all(32.0),
                       child: Center(
-                        child: Text(state.message),
+                        child: Text(
+                          state.message,
+                          style: const TextStyle(color: AppColors.grey),
+                        ),
                       ),
                     );
                   }
@@ -84,10 +102,13 @@ class TrackDetailsScreen extends StatelessWidget {
     return SliverAppBar(
       expandedHeight: 300,
       pinned: true,
+      backgroundColor: AppColors.background,
+      foregroundColor: AppColors.white,
       flexibleSpace: FlexibleSpaceBar(
         title: Text(
           track.title,
           style: const TextStyle(
+            color: AppColors.white,
             shadows: [
               Shadow(
                 offset: Offset(0, 1),
@@ -117,7 +138,7 @@ class TrackDetailsScreen extends StatelessWidget {
                   end: Alignment.bottomCenter,
                   colors: [
                     Colors.transparent,
-                    Colors.black54,
+                    Colors.black87,
                   ],
                 ),
               ),
@@ -130,12 +151,12 @@ class TrackDetailsScreen extends StatelessWidget {
 
   Widget _buildPlaceholderImage() {
     return Container(
-      color: Colors.grey[800],
+      color: AppColors.surfaceLight,
       child: const Center(
         child: Icon(
           Icons.music_note,
           size: 100,
-          color: Colors.white24,
+          color: AppColors.greyDark,
         ),
       ),
     );
@@ -150,7 +171,11 @@ class TrackDetailsScreen extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Track Info Card
-          Card(
+          Container(
+            decoration: BoxDecoration(
+              color: AppColors.surface,
+              borderRadius: BorderRadius.circular(12),
+            ),
             child: Padding(
               padding: const EdgeInsets.all(16.0),
               child: Column(
@@ -162,21 +187,21 @@ class TrackDetailsScreen extends StatelessWidget {
                     label: 'Artist',
                     value: detailedTrack.artistName,
                   ),
-                  const Divider(),
+                  const Divider(color: AppColors.surfaceLight),
                   _buildInfoRow(
                     context,
                     icon: Icons.album,
                     label: 'Album',
                     value: detailedTrack.albumName,
                   ),
-                  const Divider(),
+                  const Divider(color: AppColors.surfaceLight),
                   _buildInfoRow(
                     context,
                     icon: Icons.timer,
                     label: 'Duration',
                     value: detailedTrack.formattedDuration,
                   ),
-                  const Divider(),
+                  const Divider(color: AppColors.surfaceLight),
                   _buildInfoRow(
                     context,
                     icon: Icons.tag,
@@ -191,11 +216,13 @@ class TrackDetailsScreen extends StatelessWidget {
           const SizedBox(height: 24),
 
           // Lyrics Section
-          Text(
+          const Text(
             'Lyrics',
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+            style: TextStyle(
+              color: AppColors.white,
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
           ),
           const SizedBox(height: 8),
 
@@ -203,38 +230,51 @@ class TrackDetailsScreen extends StatelessWidget {
             const Center(
               child: Padding(
                 padding: EdgeInsets.all(16.0),
-                child: CircularProgressIndicator(),
+                child: CircularProgressIndicator(
+                  color: AppColors.accent,
+                ),
               ),
             )
           else if (state.lyrics != null && state.lyrics!.hasLyrics)
-            Card(
+            Container(
+              width: double.infinity,
+              decoration: BoxDecoration(
+                color: AppColors.surface,
+                borderRadius: BorderRadius.circular(12),
+              ),
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: SelectableText(
                   state.lyrics!.displayLyrics,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        height: 1.8,
-                      ),
+                  style: const TextStyle(
+                    color: AppColors.white,
+                    height: 1.8,
+                  ),
                 ),
               ),
             )
           else
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(32.0),
+            Container(
+              width: double.infinity,
+              decoration: BoxDecoration(
+                color: AppColors.surface,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: const Padding(
+                padding: EdgeInsets.all(32.0),
                 child: Center(
                   child: Column(
                     children: [
                       Icon(
                         Icons.lyrics_outlined,
                         size: 48,
-                        color: Theme.of(context).colorScheme.outline,
+                        color: AppColors.greyDark,
                       ),
-                      const SizedBox(height: 16),
+                      SizedBox(height: 16),
                       Text(
                         'No lyrics available',
                         style: TextStyle(
-                          color: Theme.of(context).colorScheme.outline,
+                          color: AppColors.grey,
                         ),
                       ),
                     ],
@@ -243,7 +283,7 @@ class TrackDetailsScreen extends StatelessWidget {
               ),
             ),
 
-          const SizedBox(height: 32),
+          const SizedBox(height: 100),
         ],
       ),
     );
@@ -262,22 +302,25 @@ class TrackDetailsScreen extends StatelessWidget {
           Icon(
             icon,
             size: 20,
-            color: Theme.of(context).colorScheme.primary,
+            color: AppColors.accent,
           ),
           const SizedBox(width: 12),
           SizedBox(
             width: 80,
             child: Text(
               label,
-              style: TextStyle(
-                color: Theme.of(context).textTheme.bodySmall?.color,
+              style: const TextStyle(
+                color: AppColors.grey,
               ),
             ),
           ),
           Expanded(
             child: Text(
               value,
-              style: const TextStyle(fontWeight: FontWeight.w500),
+              style: const TextStyle(
+                fontWeight: FontWeight.w500,
+                color: AppColors.white,
+              ),
             ),
           ),
         ],

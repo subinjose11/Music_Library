@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../core/theme/app_theme.dart';
 import '../../domain/entities/track.dart';
 import '../blocs/library/library_bloc.dart';
 import '../blocs/library/library_event.dart';
 import '../blocs/library/library_state.dart';
+import '../blocs/player/player_bloc.dart';
+import '../blocs/player/player_event.dart';
 import '../widgets/track_tile.dart';
 import '../widgets/sticky_header.dart';
 import '../widgets/search_bar.dart';
@@ -57,79 +60,107 @@ class _LibraryScreenState extends State<LibraryScreen> {
     );
   }
 
+  void _onPlayTrack(Track track) {
+    context.read<PlayerBloc>().add(PlayTrack(track));
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Music Library'),
-        elevation: 0,
-      ),
-      body: Column(
-        children: [
-          TrackSearchBar(
-            onSearch: (query) {
-              context.read<LibraryBloc>().add(SearchTracks(query));
-            },
-            onClear: () {
-              context.read<LibraryBloc>().add(const ClearSearch());
-            },
-          ),
-          Expanded(
-            child: BlocBuilder<LibraryBloc, LibraryState>(
-              builder: (context, state) {
-                if (state is LibraryInitial) {
-                  return const Center(
-                    child: Text('Welcome to Music Library'),
-                  );
-                }
-
-                if (state is LibraryLoading) {
-                  return const Center(
-                    child: CircularProgressIndicator(),
-                  );
-                }
-
-                if (state is LibraryError) {
-                  if (state.message == 'NO INTERNET CONNECTION') {
-                    return NoInternetWidget(
-                      message: state.message,
-                      onRetry: () {
-                        context.read<LibraryBloc>().add(const LoadInitialTracks());
-                      },
-                    );
-                  }
-                  return Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(state.message),
-                        const SizedBox(height: 16),
-                        ElevatedButton(
-                          onPressed: () {
-                            context.read<LibraryBloc>().add(const LoadInitialTracks());
-                          },
-                          child: const Text('Retry'),
-                        ),
-                      ],
-                    ),
-                  );
-                }
-
-                if (state is LibraryLoaded) {
-                  if (state.tracks.isEmpty) {
-                    return const Center(
-                      child: Text('No tracks found'),
-                    );
-                  }
-
-                  return _buildTrackList(state);
-                }
-
-                return const SizedBox.shrink();
+      backgroundColor: AppColors.background,
+      body: SafeArea(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(height: 16),
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16),
+              child: Text(
+                'Your Library',
+                style: TextStyle(
+                  color: AppColors.white,
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            const SizedBox(height: 8),
+            TrackSearchBar(
+              onSearch: (query) {
+                context.read<LibraryBloc>().add(SearchTracks(query));
+              },
+              onClear: () {
+                context.read<LibraryBloc>().add(const ClearSearch());
               },
             ),
-          ),
-        ],
+            Expanded(
+              child: BlocBuilder<LibraryBloc, LibraryState>(
+                builder: (context, state) {
+                  if (state is LibraryInitial) {
+                    return const Center(
+                      child: Text(
+                        'Welcome to Music Library',
+                        style: TextStyle(color: AppColors.grey),
+                      ),
+                    );
+                  }
+
+                  if (state is LibraryLoading) {
+                    return const Center(
+                      child: CircularProgressIndicator(
+                        color: AppColors.accent,
+                      ),
+                    );
+                  }
+
+                  if (state is LibraryError) {
+                    if (state.message == 'NO INTERNET CONNECTION') {
+                      return NoInternetWidget(
+                        message: state.message,
+                        onRetry: () {
+                          context.read<LibraryBloc>().add(const LoadInitialTracks());
+                        },
+                      );
+                    }
+                    return Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            state.message,
+                            style: const TextStyle(color: AppColors.grey),
+                          ),
+                          const SizedBox(height: 16),
+                          ElevatedButton(
+                            onPressed: () {
+                              context.read<LibraryBloc>().add(const LoadInitialTracks());
+                            },
+                            child: const Text('Retry'),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+
+                  if (state is LibraryLoaded) {
+                    if (state.tracks.isEmpty) {
+                      return const Center(
+                        child: Text(
+                          'No tracks found',
+                          style: TextStyle(color: AppColors.grey),
+                        ),
+                      );
+                    }
+
+                    return _buildTrackList(state);
+                  }
+
+                  return const SizedBox.shrink();
+                },
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -157,7 +188,9 @@ class _LibraryScreenState extends State<LibraryScreen> {
               return const Padding(
                 padding: EdgeInsets.all(16.0),
                 child: Center(
-                  child: CircularProgressIndicator(),
+                  child: CircularProgressIndicator(
+                    color: AppColors.accent,
+                  ),
                 ),
               );
             }
@@ -172,6 +205,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
               return TrackTile(
                 track: item.track,
                 onTap: () => _onTrackTap(item.track),
+                onPlayTap: () => _onPlayTrack(item.track),
               );
             }
             return const SizedBox.shrink();
@@ -186,13 +220,13 @@ class _LibraryScreenState extends State<LibraryScreen> {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.primaryContainer,
+              color: AppColors.accent,
               borderRadius: BorderRadius.circular(16),
             ),
             child: Text(
               '${state.tracks.length} tracks',
-              style: TextStyle(
-                color: Theme.of(context).colorScheme.onPrimaryContainer,
+              style: const TextStyle(
+                color: AppColors.white,
                 fontWeight: FontWeight.w500,
               ),
             ),
@@ -208,11 +242,11 @@ class _LibraryScreenState extends State<LibraryScreen> {
               child: Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.surface,
+                  color: AppColors.surface,
                   borderRadius: BorderRadius.circular(8),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.1),
+                      color: Colors.black.withValues(alpha: 0.3),
                       blurRadius: 4,
                     ),
                   ],
@@ -223,10 +257,16 @@ class _LibraryScreenState extends State<LibraryScreen> {
                     SizedBox(
                       width: 16,
                       height: 16,
-                      child: CircularProgressIndicator(strokeWidth: 2),
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: AppColors.accent,
+                      ),
                     ),
                     SizedBox(width: 8),
-                    Text('Loading more...'),
+                    Text(
+                      'Loading more...',
+                      style: TextStyle(color: AppColors.white),
+                    ),
                   ],
                 ),
               ),

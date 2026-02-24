@@ -8,7 +8,7 @@ class ApiConstants {
 
   // LRCLIB API for lyrics
   static const String lrclibBaseUrl = 'https://lrclib.net/api';
-  static const String lrclibGetEndpoint = '/get';
+  static const String lrclibGetEndpoint = '/get-cached';
 
   // Pagination
   static const int pageSize = 50;

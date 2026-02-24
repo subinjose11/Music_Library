@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../core/theme/app_theme.dart';
+
 class StickyHeader extends StatelessWidget {
   final String letter;
   final int trackCount;
@@ -15,23 +17,23 @@ class StickyHeader extends StatelessWidget {
     return Container(
       height: 32,
       padding: const EdgeInsets.symmetric(horizontal: 16),
-      color: Theme.of(context).colorScheme.surfaceContainerHighest,
+      color: AppColors.surface,
       child: Row(
         children: [
           Text(
             letter,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.bold,
-              color: Theme.of(context).colorScheme.primary,
+              color: AppColors.accent,
             ),
           ),
           const SizedBox(width: 8),
           Text(
             '($trackCount)',
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 12,
-              color: Theme.of(context).textTheme.bodySmall?.color,
+              color: AppColors.grey,
             ),
           ),
         ],

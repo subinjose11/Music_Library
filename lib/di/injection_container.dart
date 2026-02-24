@@ -7,6 +7,7 @@ import '../data/datasources/music_remote_datasource.dart';
 import '../data/repositories/music_repository_impl.dart';
 import '../domain/repositories/music_repository.dart';
 import '../presentation/blocs/library/library_bloc.dart';
+import '../presentation/blocs/player/player_bloc.dart';
 import '../presentation/blocs/track_details/track_details_bloc.dart';
 
 final sl = GetIt.instance;
@@ -19,6 +20,11 @@ Future<void> init() async {
 
   sl.registerFactory(
     () => TrackDetailsBloc(repository: sl()),
+  );
+
+  // PlayerBloc is a singleton since we want to maintain player state across screens
+  sl.registerLazySingleton(
+    () => PlayerBloc(),
   );
 
   // Repository

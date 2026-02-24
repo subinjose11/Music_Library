@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import 'core/theme/app_theme.dart';
 import 'di/injection_container.dart' as di;
 import 'presentation/blocs/library/library_bloc.dart';
-import 'presentation/screens/library_screen.dart';
+import 'presentation/blocs/player/player_bloc.dart';
+import 'presentation/screens/main_shell.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -21,26 +23,17 @@ class MusicLibraryApp extends StatelessWidget {
         BlocProvider(
           create: (context) => di.sl<LibraryBloc>(),
         ),
+        BlocProvider(
+          create: (context) => di.sl<PlayerBloc>(),
+        ),
       ],
       child: MaterialApp(
         title: 'Music Library',
         debugShowCheckedModeBanner: false,
-        theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(
-            seedColor: Colors.deepPurple,
-            brightness: Brightness.light,
-          ),
-          useMaterial3: true,
-        ),
-        darkTheme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(
-            seedColor: Colors.deepPurple,
-            brightness: Brightness.dark,
-          ),
-          useMaterial3: true,
-        ),
-        themeMode: ThemeMode.system,
-        home: const LibraryScreen(),
+        theme: AppTheme.darkTheme,
+        darkTheme: AppTheme.darkTheme,
+        themeMode: ThemeMode.dark,
+        home: const MainShell(),
       ),
     );
   }
